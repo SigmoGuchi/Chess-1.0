@@ -6,7 +6,7 @@
   processing, and drawing graphic objects.
 
   ## Requirements
-- C++17/C++20 (depending on project configuration in Visual Studio 2022)
+- C++14 (depending on project configuration in Visual Studio 2022)
 - Visual Studio 2022
 - SFML (the version used in the project)
 
