@@ -4,12 +4,10 @@
 #include<functional>
 
 
-    King::King(char color) :Piece(PieceType::King, color) {
-    }
+    King::King(char color) :Piece(PieceType::King, color) {}
     King::~King() {}
 
     bool King::IsMoveAllowed(int ox, int oy, int nx, int ny, const Board& board)const {
-        // Normal moves of the king
         int dx = std::abs(nx - ox);
         int dy = std::abs(ny - oy);
         if ((dx <= 1 && dy <= 1) && !(dx == 0 && dy == 0)) {
@@ -23,7 +21,6 @@
                 return false;
             }
 
-            // Checking for the presence of a tour in the desired position
             int rookX = (nx > ox) ? 7 : 0;
             Piece* rook = board.GetPieceAt(rookX, oy);
             if (rook == nullptr || rook->GetType() != PieceType::Rook || !rook->IsFirstMove()) {
@@ -42,7 +39,7 @@
                     return false;
                 }
             }
-            return true; // Casting conditions are fulfilled
+            return true;
 
         }
 

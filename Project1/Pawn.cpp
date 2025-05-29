@@ -1,8 +1,7 @@
 #include "Pawn.h"
 #include "Board.h"
 
-Pawn::Pawn(char color) :Piece(PieceType::Pawn, color) {
-}
+Pawn::Pawn(char color) :Piece(PieceType::Pawn, color) {}
 Pawn::~Pawn(){}
 
 
@@ -98,7 +97,6 @@ PieceType Pawn::PromptPromotionChoiceWithUI(int x, int y, RenderWindow& window,B
     Sprite sprite(texture);
     sprite.setPosition(x * board.GetCellSize(), y * board.GetCellSize());
 
-    // Basic cycle for selection
     while (window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
@@ -109,7 +107,6 @@ PieceType Pawn::PromptPromotionChoiceWithUI(int x, int y, RenderWindow& window,B
                 int mouseX = event.mouseButton.x;
                 int mouseY = event.mouseButton.y;
 
-                // Checking which part of the image was clicked
                 sf::Vector2f position = sprite.getPosition();
                 int relativeX = mouseX - static_cast<int>(position.x);
                 int relativeY = mouseY - static_cast<int>(position.y);
@@ -119,21 +116,20 @@ PieceType Pawn::PromptPromotionChoiceWithUI(int x, int y, RenderWindow& window,B
                 int height = texture.getSize().y / 2;
 
                 if (relativeX >= 0 && relativeX < width && relativeY >= 0 && relativeY < height) {
-                    return PieceType::Rook;// The upper left part is a tour
+                    return PieceType::Rook;
                 }
                 else if (relativeX >= width && relativeX < 2 * width && relativeY >= 0 && relativeY < height) {
-                    return PieceType::Queen; // The upper right part is the queen
+                    return PieceType::Queen;
                 }
                 else if (relativeX >= 0 && relativeX < width && relativeY >= height && relativeY < 2 * height) {
-                 return PieceType::Knight; // The lower left part is a horse
+                 return PieceType::Knight;
                 }
                 else if (relativeX >= width && relativeX < 2 * width && relativeY >= height && relativeY < 2 * height) {
-                    return PieceType::Bishop;// The lower right part is an elephant
+                    return PieceType::Bishop;
                 }
             }
         }
 
-        // Cleaning, painting and updating the window
         window.clear();
         board.PrintBoard(window);
         window.draw(sprite);

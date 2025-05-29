@@ -1,10 +1,7 @@
 #include "Bishop.h"
 #include "Board.h"
 
-Bishop::Bishop(char color) :Piece(PieceType::Bishop, color) {
-
-}
-
+Bishop::Bishop(char color) :Piece(PieceType::Bishop, color) {}
 Bishop::~Bishop() {}
 
 bool Bishop::IsMoveAllowed(int ox, int oy, int nx, int ny, const Board& board) const{

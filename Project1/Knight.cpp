@@ -1,8 +1,7 @@
 #include "Knight.h"
 #include "Board.h"
 
-Knight::Knight(char color):Piece(PieceType::Knight,color) {
-}
+Knight::Knight(char color):Piece(PieceType::Knight,color) {}
 Knight::~Knight() {}
 
 bool Knight::IsMoveAllowed(int ox, int oy, int nx, int ny, const Board& board) const {
@@ -27,7 +26,6 @@ std::vector<std::pair<int, int>> Knight::GetAvailableMoves(int x, int y, Board& 
         int nx = x + dx[i];
         int ny = y + dy[i];
 
-        // Перевіряємо межі дошки
         if (IsMoveAllowed(x,y,nx,ny,board)) {
             availableMoves.push_back({ nx, ny });
         }

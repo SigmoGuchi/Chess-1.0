@@ -10,11 +10,10 @@
         }
 
         for (auto& pair : pieceTrees) {
-            delete pair.second; // Removal of trees
+            delete pair.second;
         }
     }
 
-    // Binary trees
     void Board::AddToTree(TreeNode*& root, PieceType type, int index, int level, char color, std::pair<int, int> position) {
         if (!root) {
             root = new TreeNode(type, index, level, color, position);
@@ -31,7 +30,6 @@
         }
         else {
             if (index >= root->index) {
-                  // Ignoring the rule of binary trees about writing the larger element to the left
                 AddToTree(root->right, type, index, level + 1, color, position);
             }
             else {
@@ -56,7 +54,6 @@
             return;
         }
 
-        // Recursively search in the left and right branches
         UpdateTreeNodePosition(root->left, type, color, newPosition);
         UpdateTreeNodePosition(root->right, type, color, newPosition);
     }
@@ -119,7 +116,6 @@
             TreeNode* root = pair.second;
             if (root != nullptr) {
                 pieceCount += CountPiecesInTree(root);
-
                 if (type != PieceType::King) {
                     return false;
                 }
@@ -158,16 +154,14 @@
         pieceTrees.clear();
 
         for (int i = 0; i < 8; i++) {
-             board[1][i] = new Pawn('B'); // White
-             board[6][i] = new Pawn('W'); // Black
+             board[1][i] = new Pawn('B');
+             board[6][i] = new Pawn('W');
              AddToHashTable(PieceType::Pawn, i, 'W',{i,6});
              AddToHashTable(PieceType::Pawn, i, 'B', { i,1 });
         }
 
-
-        // White figures
         board[7][0] = new Rook('W'); // {y, x}
-        AddToHashTable(PieceType::Rook, 1, 'W', { 0,7 }); // {x, y}
+        AddToHashTable(PieceType::Rook, 1, 'W', { 0,7 });
         board[7][1] = new Knight('W');
         AddToHashTable(PieceType::Knight, 1, 'W', { 1,7 });
         board[7][2] = new Bishop('W');
@@ -183,7 +177,7 @@
         board[7][7] = new Rook('W');
         AddToHashTable(PieceType::Rook, 2, 'W', { 7,7 });
 
-        // Black figures
+
         board[0][0] = new Rook('B');
         AddToHashTable(PieceType::Rook, 3, 'B', { 0,0 });
         board[0][1] = new Knight('B');
@@ -209,7 +203,6 @@
         window.draw(boardSprite);
         for (int y = 0; y < 8; y++) {
             for (int x = 0; x < 8; x++) {
-                // draw a figure if there is one
                 if (board[y][x] != nullptr) {
                     board[y][x]->GetSprite().setPosition(x * size + xOffset, y * size + yOffset);
                     window.draw(board[y][x]->GetSprite());
@@ -218,34 +211,34 @@
         }
     }
     
-    bool Board::IsMoveValid(int ox, int oy, int nx, int ny) {
-        // Checking the coordinates of the board
-        if (ox < 0 || oy < 0 || nx < 0 || ny < 0 || ox >= 8 || oy >= 8 || nx >= 8 || ny >= 8) {
+    
+    bool Board::IsMoveWithinBounds(int x, int y) {
+        return x >= 0 && y >= 0 && x < 8 && y < 8;
+    }
+    bool Board::IsBasicMoveValid(int ox, int oy, int nx, int ny) {
+        if (!IsMoveWithinBounds(ox, oy) || !IsMoveWithinBounds(nx, ny)) {
             return false;
         }
 
-        // Checking the presence of a figure at the initial position
         Piece* piece = board[oy][ox];
         if (piece == nullptr) {
             return false;
         }
 
-        // Checking for the presence of a piece of the same color in the target position
         Piece* targetPiece = board[ny][nx];
         if (targetPiece != nullptr && targetPiece->GetColor() == piece->GetColor()) {
             return false;
         }
 
-        // Checking the admissibility of the figure's move
-        if (!piece->IsMoveAllowed(ox, oy, nx, ny, *this)) {
-            return false;
-        }
+        return piece->IsMoveAllowed(ox, oy, nx, ny, *this);
+    }
+    bool Board::DoesMovePutKingInCheck(int ox, int oy, int nx, int ny) {
+        Piece* piece = board[oy][ox];
+        Piece* targetPiece = board[ny][nx];
 
-        // Motion simulation
         board[oy][ox] = nullptr;
         board[ny][nx] = piece;
 
-        // Check: whether the king remains in check
         auto kingPosition = FindPiece(PieceType::King, piece->GetColor());
         King* king = dynamic_cast<King*>(board[kingPosition.second][kingPosition.first]);
         bool isKingInCheck = king && king->IsInCheck(*this);
@@ -253,30 +246,33 @@
         board[oy][ox] = piece;
         board[ny][nx] = targetPiece;
 
-        return !isKingInCheck;
+        return isKingInCheck;
     }
-    bool Board::MovePieces(int ox, int oy, int nx, int ny) {
-        Piece* movingPiece = board[oy][ox];
-        Piece* targetPiece = board[ny][nx];
-
-        if (!IsMoveValid(ox, oy, nx, ny)) return false;
-
-        if (targetPiece) {
-            RemovePiece(targetPiece->GetType(), targetPiece->GetColor());
-            delete targetPiece;
+    bool Board::IsMoveValid(int ox, int oy, int nx, int ny) {
+        if (!IsBasicMoveValid(ox, oy, nx, ny)) {
+            return false;
         }
+        return !DoesMovePutKingInCheck(ox, oy, nx, ny);
+    }
 
-        SetPieceAt(nx, ny, movingPiece);
-        SetPieceAt(ox, oy, nullptr);
-
+    
+    void Board::RemoveCapturedPiece(Piece* targetPiece) {
+        RemovePiece(targetPiece->GetType(), targetPiece->GetColor());
+        delete targetPiece;
+    }
+    void Board::MovePieceToNewPosition(int ox, int oy, int nx, int ny, Piece* movingPiece) {
+        SetPieceAt(nx,ny,movingPiece);
+        SetPieceAt(ox,oy,nullptr);
+    }
+    void Board::UpdatePiecePositionInTree(Piece* movingPiece, int nx, int ny) {
         UpdateTreeNodePosition(pieceTrees[movingPiece->GetType()], movingPiece->GetType(), movingPiece->GetColor(), { nx, ny });
-        //PrintTrees();
-
+    }
+    void Board::HandlePawnPromotion(Piece* movingPiece, int nx, int ny) {
         if (movingPiece->GetType() == PieceType::Pawn) {
             static_cast<Pawn*>(movingPiece)->HandlePromotion(*this, nx, ny, *Window);
         }
-
-
+    }
+    void Board::HandleKingCastling(int ox, int oy, int nx, int ny, Piece* movingPiece) {
         if (movingPiece->GetType() == PieceType::King && std::abs(nx - ox) == 2) {
             int rookX = (nx > ox) ? 7 : 0;
             int newRookX = (nx > ox) ? nx - 1 : nx + 1;
@@ -289,6 +285,22 @@
                 rook->SetFirstMove(false);
             }
         }
+    }
+    bool Board::MovePieces(int ox, int oy, int nx, int ny) {
+        Piece* movingPiece = board[oy][ox];
+        Piece* targetPiece = board[ny][nx];
+
+        if (!IsMoveValid(ox, oy, nx, ny)) return false;
+
+        if (targetPiece) {
+            RemoveCapturedPiece(targetPiece);
+        }
+
+        MovePieceToNewPosition(ox, oy, nx, ny, movingPiece);
+        UpdatePiecePositionInTree(movingPiece, nx, ny);
+
+        HandlePawnPromotion(movingPiece, nx, ny);
+        HandleKingCastling(ox, oy, nx, ny, movingPiece);
 
         movingPiece->SetFirstMove(false);
 
@@ -311,7 +323,7 @@
     std::pair<int, int> Board::FindPiece(PieceType type, char color) const {
         auto it = pieceTrees.find(type);
         if (it == pieceTrees.end()) {
-            return { -1, -1 }; // There is no tree for this type
+            return { -1, -1 };
         }
 
         TreeNode* current = it->second;
@@ -320,19 +332,16 @@
                 return current->position;
             }
 
-            // Transition logic
             if (color == 'W') {
-                current = current->left; // We are looking for white figures to the left
+                current = current->left;
             }
             else {
-                current = current->right; // We look for black figures to the right
+                current = current->right;
             }
         }
 
-        return { -1, -1 }; // Figure not found
+        return { -1, -1 };
     }
-
-    // Getters
     Piece* Board::GetPieceAt(int x, int y) const {
         if (x < 0 || x >= 8 || y < 0 || y >= 8) return nullptr;
         return board[y][x];

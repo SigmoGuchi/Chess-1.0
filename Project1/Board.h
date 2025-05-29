@@ -48,7 +48,6 @@ struct TreeNode {
 		Board();
 		~Board();
 
-
 		std::vector<std::pair<int, int>> GetHighlights() { return highlightedCells; }
 		void HighlightCells(const std::vector<std::pair<int, int>>& cells) { highlightedCells = cells; }
 		void ClearHighlights() { highlightedCells.clear(); }
@@ -61,7 +60,7 @@ struct TreeNode {
 			}
 		}
 
-		// Binary trees
+
 		void AddToTree(TreeNode*& root, PieceType type, int index, int level, char color, std::pair<int, int> position);
 		void AddToHashTable(PieceType type, int index, char color, std::pair<int, int> position);
 		void UpdateTreeNodePosition(TreeNode* root, PieceType type, char color, std::pair<int, int> newPosition);
@@ -73,27 +72,35 @@ struct TreeNode {
 		void PrintTree(TreeNode* root);
 		void PrintTrees();
 
+
 		void Initialize();
 		void PrintBoard(RenderWindow& window);
 
-		//Логіка для перевірки та виконання ходу
+
+		bool IsMoveWithinBounds(int x,int y);
+		bool IsBasicMoveValid(int ox, int oy, int nx, int ny);
+		bool DoesMovePutKingInCheck(int ox, int oy, int nx, int ny);
 		bool IsMoveValid(int ox,int oy,int nx,int ny);
+
+		void RemoveCapturedPiece(Piece* targetPiece);
+		void MovePieceToNewPosition(int ox, int oy, int nx, int ny, Piece* movingPiece);
+		void UpdatePiecePositionInTree(Piece* movingPiece, int nx, int ny);
+		void HandlePawnPromotion(Piece* movingPiece, int nx, int ny);
+		void HandleKingCastling(int ox, int oy, int nx, int ny, Piece* movingPiece);
 		bool MovePieces(int ox, int oy, int nx, int ny);
+
 
 		bool IsSquareUnderAttack(int x, int y, char color) const;
 
 		std::pair<int, int> FindPiece(PieceType type, char color) const;
-
-
 		bool IsCellEmpty(int x, int y) const{ return GetPieceAt(x, y) == nullptr; }
 
-		// Getters
+
 		float GetCellSize() const { return size; }
 		const std::vector<std::vector<Piece*>>& GetBoard() const { return board; }
 		const std::map<PieceType, TreeNode*>& GetPieceTrees() const { return pieceTrees; }
 		Piece* GetPieceAt(int x, int y) const;
 
-		// Setters
 		void SetWindow(RenderWindow* window) { Window = window; }
 		void SetPieceAt(int x, int y, Piece* piece){ board[y][x] = piece; }
 		void SetTexture(Texture& texture) { boardSprite.setTexture(texture); }

@@ -2,8 +2,7 @@
 #include "Board.h"
 
 
-Queen::Queen(char color) :Piece(PieceType::Queen, color) {
-}
+Queen::Queen(char color) :Piece(PieceType::Queen, color) {}
 Queen::~Queen(){}
 
 bool Queen::IsMoveAllowed(int ox, int oy, int nx, int ny, const Board& board) const {

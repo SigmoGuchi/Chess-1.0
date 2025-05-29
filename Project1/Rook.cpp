@@ -1,8 +1,7 @@
 #include "Rook.h"
 #include "Board.h"
 
-	Rook::Rook(char color) :Piece(PieceType::Rook, color) {
-	}
+	Rook::Rook(char color) :Piece(PieceType::Rook, color) {}
 	Rook::~Rook(){}
 
 	bool Rook::IsMoveAllowed(int ox, int oy, int nx, int ny, const Board& board) const {
